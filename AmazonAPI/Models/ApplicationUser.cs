@@ -20,10 +20,6 @@ namespace AmazonAPI.Models
         public string Phone { get; set; }
         [AllowNull]
         public string? ProfilePhoto { get; set; }
-        [Required, EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
         //navigation properties
         public List<Store>? Stores { get; set; }
         public List<CartItem>? CartItems { get; set; }
