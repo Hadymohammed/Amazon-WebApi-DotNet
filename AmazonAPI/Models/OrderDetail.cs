@@ -6,10 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using AmazonAPI.Data;
+using AmazonAPI.Data.Repository;
 
 namespace AmazonAPI.Models
 {
-    public class OrderDetail
+    public class OrderDetail : IEntityBase
     {
         [Key]
         public int Id { get; set; }

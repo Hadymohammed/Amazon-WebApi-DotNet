@@ -25,11 +25,9 @@ namespace AmazonAPI.Data
             modelBuilder.Entity<Product>().HasMany(p => p.Photos).WithOne(p => p.Product).HasForeignKey(p => p.ProductId);
             modelBuilder.Entity<Product>().HasMany(p => p.Tags).WithOne(p => p.Product).HasForeignKey(p => p.ProductId);
 
-            modelBuilder.Entity<CartItem>().HasKey(ci => new { ci.CustomerId, ci.ProductId });
             modelBuilder.Entity<CartItem>().HasOne(ci => ci.Customer).WithMany(c => c.CartItems).HasForeignKey(ci => ci.CustomerId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<CartItem>().HasOne(ci => ci.Product).WithMany(p => p.Carts).HasForeignKey(ci => ci.ProductId).OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<WishListItem>().HasKey(wl => new { wl.CustomerId, wl.ProductId });
             modelBuilder.Entity<WishListItem>().HasOne(wl => wl.Customer).WithMany(c => c.WishListItems).HasForeignKey(wl => wl.CustomerId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<WishListItem>().HasOne(wl => wl.Product).WithMany(p => p.WishLists).HasForeignKey(wl => wl.ProductId).OnDelete(DeleteBehavior.Restrict);
 

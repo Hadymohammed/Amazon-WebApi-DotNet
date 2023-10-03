@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using AmazonAPI.Data.Repository;
 
 namespace AmazonAPI.Models
 {
-    public class Offer
+    public class Offer : IEntityBase
     {
         [Key]
         public int Id { get; set; }

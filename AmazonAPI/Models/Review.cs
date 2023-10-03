@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using AmazonAPI.Data.Repository;
 
 namespace AmazonAPI.Models
 {
-    public class Review
+    public class Review : IEntityBase
     {
         [Key]
         public int Id { get; set; }
