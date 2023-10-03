@@ -1,5 +1,7 @@
 using System.Text;
 using AmazonAPI.Data;
+using AmazonAPI.Data.Repository;
+using AmazonAPI.Data.Repository.Services;
 using AmazonAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +39,19 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AmazonAPIAmazon"))
     };
 });
+
+
+// Add Repositories
+builder.Services.AddScoped<ICartItemService, CartItemService>();
+builder.Services.AddScoped<IOfferService, OfferService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductPhotoService, ProductPhotoService>();
+builder.Services.AddScoped<IProductTagService, ProductTagService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IWishListItemService, WishListItemService>();
 
 var app = builder.Build();
 
