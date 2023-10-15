@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AmazonAPI.Data.Enums
+namespace AmazonAPI.Data.Consts
 {
     public static class UserRoles
     {
-        public static string Admin { get; } = "Admin";
-        public static string Customer { get; } = "Customer";
-        public static string Seller { get; } = "Seller";
-
+        public const string Admin = "Admin";
+        public const string Customer = "Customer";
+        public const string Seller = "Seller";
     }
 }

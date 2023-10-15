@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AmazonAPI.Data.Consts;
-using AmazonAPI.Data.Enums;
 using AmazonAPI.Models;
 using Microsoft.AspNetCore.Identity;
 
