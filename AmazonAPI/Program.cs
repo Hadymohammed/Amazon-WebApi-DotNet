@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,9 +35,11 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateLifetime = true,
+        ValidateAudience = false,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "Amazon",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("AmazonAPIAmazon"))
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
     };
 });
 
@@ -53,6 +56,36 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IWishListItemService, WishListItemService>();
 
+//swagger
+builder.Services.AddSwaggerGen(opt =>
+    {
+        opt.SwaggerDoc("v1", new OpenApiInfo { Title = "AmazonAPI", Version = "v1" });
+        opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter token",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "bearer"
+        });
+
+        opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type=ReferenceType.SecurityScheme,
+                        Id="Bearer"
+                    }
+                },
+                new string[]{}
+            }
+        });
+    });
+
 var app = builder.Build();
 
 AppDbInitializer.SeedUsersAndRolesAsync(app).Wait();
@@ -62,7 +95,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
+app.UseCors();
 
 app.UseHttpsRedirection();
 
