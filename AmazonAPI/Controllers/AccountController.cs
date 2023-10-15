@@ -21,11 +21,14 @@ namespace AmazonAPI.Controllers
         #region Dependencies
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
         public AccountController(UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
         #endregion
         [HttpPost]
@@ -35,12 +38,15 @@ namespace AmazonAPI.Controllers
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User already exists!" });
+            if (!await _roleManager.RoleExistsAsync(model.Role))
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "Role does not exist!" });
+
             ApplicationUser user = new ApplicationUser()
             {
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Address = model.Address,
-                Phone = model.Phone,
+                Phone = model.Phone!,
                 UserName = model.UserName,
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString()
@@ -48,7 +54,7 @@ namespace AmazonAPI.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
-            //create resource link
+            await _userManager.AddToRoleAsync(user, model.Role);
             var url = Url.Action("GetUserById", "Account", new { id = user.Id });
             return Created(url, user);
         }
@@ -93,7 +99,18 @@ namespace AmazonAPI.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return NotFound();
-            return Ok(user);
+            //get userRoles
+            var roles = await _userManager.GetRolesAsync(user);
+            return Ok(new UserDetailsDTO
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Address = user.Address,
+                Phone = user.Phone,
+                UserName = user.UserName,
+                Email = user.Email,
+                Roles = roles.ToList()
+            });
         }
     }
 }
