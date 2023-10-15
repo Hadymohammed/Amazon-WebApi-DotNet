@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AmazonAPI.Data.DTOs;
+using AmazonAPI.Data.Consts;
 using AmazonAPI.Data.Repository.Services;
 using AmazonAPI.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,8 +23,8 @@ namespace AmazonAPI.Controllers
         {
             _storeService = storeService;
         }
-        //create store
         [HttpPost]
+        [Authorize(Roles = UserRoles.Seller)]
         public async Task<IActionResult> CreateStore([FromBody] CreateStoreDTO model)
         {
             if (ModelState.IsValid)
@@ -47,7 +48,7 @@ namespace AmazonAPI.Controllers
                 try
                 {
                     await _storeService.AddAsync(store);
-                    var url = Url.Action("Store", new { id = store.Id });
+                    var url = Url.Action("GetById", new { id = store.Id });
                     return Created(url, store);
                 }
                 catch (Exception e)
@@ -60,10 +61,9 @@ namespace AmazonAPI.Controllers
                 return BadRequest(ModelState);
             }
         }
-        //get store by id
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Store(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
@@ -74,6 +74,7 @@ namespace AmazonAPI.Controllers
                 }
                 return Ok(new StoreDetailsDTO
                 {
+                    Id = store.Id,
                     Name = store.Name,
                     LogoUrl = store.LogoUrl,
                     Address = store.Address,
@@ -90,10 +91,9 @@ namespace AmazonAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-        //get all stores
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Stores()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
@@ -104,6 +104,7 @@ namespace AmazonAPI.Controllers
                 }
                 return Ok(stores.Select(s => new StoreDetailsDTO
                 {
+                    Id = s.Id,
                     Name = s.Name,
                     LogoUrl = s.LogoUrl,
                     Address = s.Address,
@@ -121,6 +122,7 @@ namespace AmazonAPI.Controllers
             }
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = UserRoles.Seller)]
         public async Task<IActionResult> UpdateStore(int id, [FromBody] CreateStoreDTO model)
         {
             if (ModelState.IsValid)
@@ -146,6 +148,7 @@ namespace AmazonAPI.Controllers
                     await _storeService.UpdateAsync(store.Id, store);
                     return Ok(new StoreDetailsDTO
                     {
+                        Id = store.Id,
                         Name = store.Name,
                         LogoUrl = store.LogoUrl,
                         Address = store.Address,
