@@ -8,6 +8,8 @@ namespace AmazonAPI.Data.Repository.Services
 {
     public interface IWishListItemService : IEntityBaseRepository<WishListItem>
     {
+        Task<List<WishListItem>> GetWishListByUserIdAsync(string userId);
 
+        Task<WishListItem> GetByProductIdAsync(int productId);
     }
 }
