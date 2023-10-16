@@ -17,6 +17,8 @@ namespace AmazonAPI.Models
         public string CustomerId { get; set; }
         [ForeignKey("Product")]
         public int ProductId { get; set; }
+        [Required]
+        public int Quantity { get; set; }
         [AllowNull]
         public double? TotalPrice { get; set; }
         //navigation properties
