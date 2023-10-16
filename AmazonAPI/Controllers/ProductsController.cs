@@ -162,6 +162,38 @@ namespace AmazonAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
+        [HttpGet("store/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByStoreId(int id)
+        {
+            try
+            {
+                var products = await _productService.GetAllAsync(p => p.Store, p => p.Photos, p => p.Tags);
+                if (products == null)
+                {
+                    return NotFound();
+                }
+                return Ok(products.Where(p => p.StoreId == id).Select(p => new ProductDetailsDTO()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Quantity = p.Quantity,
+                    Rating = p.Rating,
+                    StoreId = p.StoreId,
+                    OfferId = p.OfferId,
+                    Photos = p.Photos?.Select(p => new PhotoStruct { Id = p.Id, Url = p.Url, Title = p.Title }).ToList(),
+                    Tags = p.Tags?.Select(t => new TagStruct { Id = t.Id, Key = t.Key, Value = t.Value }).ToList()
+                }));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
         /*[HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Seller)]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductDTO model)
