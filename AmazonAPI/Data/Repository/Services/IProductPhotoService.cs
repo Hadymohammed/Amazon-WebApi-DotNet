@@ -8,6 +8,6 @@ namespace AmazonAPI.Data.Repository.Services
 {
     public interface IProductPhotoService : IEntityBaseRepository<ProductPhoto>
     {
-
+        Task<IEnumerable<ProductPhoto>> GetPhotosByProductIdAsync(int productId);
     }
 }

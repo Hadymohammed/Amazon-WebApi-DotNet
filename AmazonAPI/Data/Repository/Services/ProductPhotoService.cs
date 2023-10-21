@@ -13,5 +13,10 @@ namespace AmazonAPI.Data.Repository.Services
         {
             _context = context;
         }
+
+        public async Task<IEnumerable<ProductPhoto>> GetPhotosByProductIdAsync(int productId)
+        {
+            return _context.ProductPhotos.Where(p => p.ProductId == productId).ToList();
+        }
     }
 }
