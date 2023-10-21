@@ -261,14 +261,13 @@ namespace AmazonAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-        //get photos by product id
-        [HttpGet("photo/{productId}")]
+        [HttpGet("photo")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetPhotosByProductId(int productId)
+        public async Task<IActionResult> GetPhotosByProductId([FromQuery] int productId)
         {
             try
             {
-                var photos = await _productPhotoService.GetAllAsync(p => p.ProductId == productId);
+                var photos = await _productPhotoService.GetPhotosByProductIdAsync(productId);
                 if (photos == null)
                 {
                     return NotFound();
@@ -286,7 +285,6 @@ namespace AmazonAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-        //update photo
         [HttpPut("photo/{id}")]
         [Authorize(Roles = UserRoles.Seller)]
         public async Task<IActionResult> UpdatePhoto(int id, [FromBody] CreateProductPhotoDTO model)
