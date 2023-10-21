@@ -1,3 +1,4 @@
+using System.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ using AmazonAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AmazonAPI.Data.Structures;
+using System.Security.Claims;
 
 namespace AmazonAPI.Controllers
 {
@@ -192,8 +194,142 @@ namespace AmazonAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
-
+        [HttpPost("photo")]
+        [Authorize(Roles = UserRoles.Seller)]
+        public async Task<IActionResult> AddPhoto([FromBody] CreateProductPhotoDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                var product = await _productService.GetByIdAsync(model.ProductId, p => p.Store);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                if (product.Store!.OwnerId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value)
+                {
+                    return Unauthorized();
+                }
+                var photo = new ProductPhoto()
+                {
+                    ProductId = model.ProductId,
+                    Url = model.Url,
+                    Title = model.Title
+                };
+                try
+                {
+                    await _productPhotoService.AddAsync(photo);
+                    var url = Url.Action("GetPhotoById", new { id = photo.Id });
+                    return Created(url, new CreateProductPhotoDTO
+                    {
+                        ProductId = photo.ProductId,
+                        Id = photo.Id,
+                        Url = photo.Url,
+                        Title = photo.Title
+                    });
+                }
+                catch (Exception e)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+        [HttpGet("photo/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPhotoById(int id)
+        {
+            try
+            {
+                var photo = await _productPhotoService.GetByIdAsync(id);
+                if (photo == null)
+                {
+                    return NotFound();
+                }
+                return Ok(new CreateProductPhotoDTO
+                {
+                    Id = photo.Id,
+                    ProductId = photo.ProductId,
+                    Url = photo.Url,
+                    Title = photo.Title
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        //get photos by product id
+        [HttpGet("photo/{productId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPhotosByProductId(int productId)
+        {
+            try
+            {
+                var photos = await _productPhotoService.GetAllAsync(p => p.ProductId == productId);
+                if (photos == null)
+                {
+                    return NotFound();
+                }
+                return Ok(photos.Select(p => new CreateProductPhotoDTO
+                {
+                    Id = p.Id,
+                    ProductId = p.ProductId,
+                    Url = p.Url,
+                    Title = p.Title
+                }));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+        //update photo
+        [HttpPut("photo/{id}")]
+        [Authorize(Roles = UserRoles.Seller)]
+        public async Task<IActionResult> UpdatePhoto(int id, [FromBody] CreateProductPhotoDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                var photo = await _productPhotoService.GetByIdAsync(id);
+                if (photo == null)
+                {
+                    return NotFound();
+                }
+                var product = await _productService.GetByIdAsync(photo.ProductId, p => p.Store);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                if (product.Store!.OwnerId != User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value)
+                {
+                    return Unauthorized();
+                }
+                photo.Url = model.Url;
+                photo.Title = model.Title;
+                try
+                {
+                    await _productPhotoService.UpdateAsync(photo.Id, photo);
+                    return Ok(new CreateProductPhotoDTO
+                    {
+                        Id = photo.Id,
+                        ProductId = photo.ProductId,
+                        Url = photo.Url,
+                        Title = photo.Title
+                    });
+                }
+                catch (Exception e)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
         /*[HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Seller)]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductDTO model)
